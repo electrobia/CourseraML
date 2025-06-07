@@ -1,0 +1,61 @@
+---
+title: "Module 4"
+output: html_document
+---
+
+# Load required libraries
+```{r}
+library(caret)
+library(randomForest)
+library(rpart)
+library(rpart.plot)
+library(tidyverse)
+library(e1071)
+```
+
+#Load the data
+```{r}
+training_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testing_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+```
+
+#Read and clean the data. Remove NA and useless columns
+```{r}
+training <- read.csv(training_url, na.strings = c("NA", "#DIV/0!", ""))
+training<-training[,colSums(is.na(training)) == 0]
+training   <-training[,-c(1:7)]
+testing  <- read.csv(testing_url, na.strings = c("NA", "#DIV/0!", ""))
+testing <-testing[,colSums(is.na(testing)) == 0]
+testing <-testing[,-c(1:7)]
+```
+
+#Split the data to 70% for training and 30% for validation
+```{r}
+set.seed(123)
+inTrain <- createDataPartition(training$classe, p=0.7, list=FALSE)
+trainSet <- training[inTrain, ]
+validateSet <- training[-inTrain, ]
+```
+
+#plot the training set
+```{r message=TRUE, warning=FALSE}
+barplot(table(trainSet$classe))
+```
+
+#Build the model
+```{r}
+modelFit <- train(classe ~ ., data=trainSet, method="rf", trControl=trainControl(method="cv", number=5), ntree = 100)
+```
+
+#Validate the model
+```{r}
+predictions <- predict(modelFit, validateSet)
+validateSetClass <-  as.factor(validateSet$classe)
+confusionMatrix(predictions, validateSetClass)
+```
+
+#Apply to test
+```{r}
+test_predictions <- predict(modelFit, testing)
+test_predictions
+```
