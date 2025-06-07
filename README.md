@@ -1,46 +1,47 @@
 # CourseraML
 Coursera Practical Machine Learning Module 4
 
-# Load required libraries
-library(caret)
-library(randomForest)
-library(rpart)
-library(rpart.plot)
-library(tidyverse)
-library(e1071)
+# Predicting Exercise Type Using Accelerometer Data
 
+This project uses machine learning to predict types of physical exercise based on accelerometer data. It is part of the Practical Machine Learning course on Coursera.
 
-#Load the data
-training_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
-testing_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+## Load required libraries
+`library(caret)`  
+`library(randomForest)`  
+`library(rpart)`  
+`library(rpart.plot)`  
+`library(tidyverse)`  
+`library(e1071)`  
 
-#Read and clean the data. Remove NA and useless columns
-training <- read.csv(training_url, na.strings = c("NA", "#DIV/0!", ""))
-training<-training[,colSums(is.na(training)) == 0]
-training   <-training[,-c(1:7)]
-testing  <- read.csv(testing_url, na.strings = c("NA", "#DIV/0!", ""))
-testing <-testing[,colSums(is.na(testing)) == 0]
-testing <-testing[,-c(1:7)]
+## Load the data
+`training_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"`  
+`testing_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"`  
 
+## Read and clean the data. Remove NA and useless columns
+`training <- read.csv(training_url, na.strings = c("NA", "#DIV/0!", ""))`  
+`training<-training[,colSums(is.na(training)) == 0]`  
+`training   <-training[,-c(1:7)]`  
+`testing  <- read.csv(testing_url, na.strings = c("NA", "#DIV/0!", ""))`  
+`testing <-testing[,colSums(is.na(testing)) == 0]`  
+`testing <-testing[,-c(1:7)]`  
 
-#Split the data to 70% for training and 30% for validation
-set.seed(123)
-inTrain <- createDataPartition(training$classe, p=0.7, list=FALSE)
-trainSet <- training[inTrain, ]
-validateSet <- training[-inTrain, ]
+## Split the data to 70% for training and 30% for validation
+`set.seed(123)`  
+`inTrain <- createDataPartition(training$classe, p=0.7, list=FALSE)`  
+`trainSet <- training[inTrain, ]`  
+`validateSet <- training[-inTrain, ]`  
 
-#Plot the training set.
-barplot(table(trainSet$classe))
+## plot the trainSet
+`barplot(table(trainSet$classe))`
 
+## Build the model
+`modelFit <- train(classe ~ ., data=trainSet, method="rf", trControl=trainControl(method="cv", number=5), ntree = 100)`
 
-#Build the model
-modelFit <- train(classe ~ ., data=trainSet, method="rf", trControl=trainControl(method="cv", number=5), ntree = 100)
-
-#Validate the model
-predictions <- predict(modelFit, validateSet)
-validateSetClass <-  as.factor(validateSet$classe)
-confusionMatrix(predictions, validateSetClass)
-Confusion Matrix and Statistics
+## Validate the model
+`predictions <- predict(modelFit, validateSet)`  
+`validateSetClass <-  as.factor(validateSet$classe)`  
+`confusionMatrix(predictions, validateSetClass)`  
+`Confusion Matrix and Statistics`  
 
           Reference
 Prediction    A    B    C    D    E
@@ -75,8 +76,10 @@ Balanced Accuracy      0.9991   0.9941   0.9948   0.9941   0.9949
 
 
 
-#Apply to test
-test_predictions <- predict(modelFit, testing)
-test_predictions
+## Apply to test
+`test_predictions <- predict(modelFit, testing)`
+
+## Results
+`test_predictions`  
  [1] B A B A A E D B A A B C B A E E A B B B
 Levels: A B C D E
